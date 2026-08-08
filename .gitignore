@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# BMAD Loop
+.bmad-loop/runs/
+.bmad-loop/cache/
+.bmad-loop/policy.toml
+
+# BMAD config (user-specific)
+_bmad/config.user.yaml
+_bmad/render/
+
+# BMAD generated output
+_bmad-output/
+
+# Installed skills & agents (per-machine, installed by bmad-loop init)
+.claude/
+.agents/
+
+# Per-developer Python version
+.python-version
