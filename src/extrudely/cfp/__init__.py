@@ -9,6 +9,7 @@ from extrudely.cfp.enums import (
     PlanStatusEnum,
     SketchPlaneEnum,
 )
+from extrudely.cfp.features import ExtrudeFeature
 from extrudely.cfp.models import CADFeaturePlan, PlanMetadata
 from extrudely.cfp.parameters import Parameter
 from extrudely.cfp.sketch import (
@@ -24,6 +25,7 @@ from extrudely.cfp.sketch import (
 
 __all__ = [
     "CADFeaturePlan",
+    "ExtrudeFeature",
     "PlanMetadata",
     "Parameter",
     "Sketch",
