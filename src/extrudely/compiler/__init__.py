@@ -1,1 +1,11 @@
-"""Deterministic CFP→CadQuery compiler — one template per supported operation."""
+"""Deterministic CFP->CadQuery compiler — one template per supported operation.
+
+Per AD-3: Stateless. Same CFP input always produces byte-identical CadQuery output.
+"""
+from extrudely.compiler.errors import CompilerError
+from extrudely.compiler.sketch_compiler import compile_sketch
+
+__all__ = [
+    "compile_sketch",
+    "CompilerError",
+]
