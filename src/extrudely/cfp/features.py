@@ -55,3 +55,36 @@ class ExtrudeFeature(BaseModel):
                         f"Parameter reference must be '$name', got {v!r}"
                     )
         return v
+
+
+class CutExtrudeFeature(BaseModel):
+    """CFP CUT_EXTRUDE feature per CFP spec §19.
+
+    Cuts a pocket or through-cut from a 2D sketch into an existing solid body.
+    """
+
+    feature_id: str = Field(..., description="Feature identifier, e.g. F002")
+    operation: OperationEnum = Field(default=OperationEnum.CUT_EXTRUDE)
+    sketch_id: str = Field(..., description="Sketch identifier for the cut profile, e.g. SK002")
+    target: str = Field(..., description="Feature ID to cut from, e.g. F001")
+    direction: list[float] = Field(
+        default=[0.0, 0.0, -1.0],
+        min_length=3,
+        max_length=3,
+        description="Cut direction vector [x, y, z]",
+    )
+    depth: float | str = Field(
+        ..., description="Cut depth in mm (blind), or $param_name reference"
+    )
+    termination: Literal["blind", "through_all"] = Field(
+        default="blind", description="Cut termination: blind or through_all"
+    )
+
+    model_config = {"extra": "forbid"}
+
+    @field_validator("direction")
+    @classmethod
+    def _direction_must_be_finite(cls, v: list[float]) -> list[float]:
+        if not all(math.isfinite(x) for x in v):
+            raise ValueError(f"Direction components must be finite, got {v}")
+        return v

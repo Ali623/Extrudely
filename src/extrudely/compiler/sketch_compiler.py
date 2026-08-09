@@ -15,6 +15,10 @@ _PLANE_MAP = {
     SketchPlaneEnum.YZ: "YZ",
 }
 
+# Primitives that produce already-closed wires — close() is not needed and would crash
+_SELF_CLOSING_PRIMITIVES = frozenset({"RECTANGLE", "CIRCLE"})
+
+
 def compile_sketch(sketch: Sketch) -> str:
     if sketch.plane not in _PLANE_MAP:
         raise CompilerError(
@@ -50,7 +54,7 @@ def compile_sketch(sketch: Sketch) -> str:
                 sketch.sketch_id,
                 f"Unknown primitive type: {getattr(prim, 'type', 'unknown')}",
             )
-    if sketch.closed:
+    if sketch.closed and _needs_close(sketch.geometry):
         lines.append("result = result.close()")
     return "\n".join(lines) + "\n"
 
@@ -100,3 +104,17 @@ def _compile_polyline(prim):
         else:
             out.append(f"result = result.lineTo({x}, {y})")
     return out
+
+
+def _needs_close(geometry: list) -> bool:
+    """Only open-chain primitives need explicit close().
+
+    RECTANGLE and CIRCLE produce already-closed wires in CadQuery;
+    calling close() on them would raise an error.
+    """
+    if not geometry:
+        return False
+    return any(
+        getattr(p, "type", None) not in _SELF_CLOSING_PRIMITIVES
+        for p in geometry
+    )

@@ -76,7 +76,7 @@ class TestExtrudeExecution:
         """CIRCLE Ø40 + EXTRUDE 30mm -> valid cylindrical solid."""
         sk = _mk_sketch(geometry=[
             {"type": "CIRCLE", "id": "C1", "center": [0, 0], "radius": 20},
-        ])
+        ], closed=True)
         feat = ExtrudeFeature(feature_id="F001", sketch_id="SK001", distance=30.0)
         code = compile_extrude(feat, sk)
 

@@ -85,3 +85,65 @@ class TestExtrudeFeature:
         """Empty distance string rejected at schema level."""
         with pytest.raises(ValidationError):
             ExtrudeFeature(feature_id="F001", sketch_id="SK001", distance="  ")
+
+
+class TestCutExtrudeFeature:
+    def test_valid_cut_extrude_minimal(self):
+        """CutExtrudeFeature with only required fields."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        f = CutExtrudeFeature(feature_id="F002", sketch_id="SK002", target="F001", depth=10.0)
+        assert f.feature_id == "F002"
+        assert f.operation == "CUT_EXTRUDE"
+        assert f.target == "F001"
+        assert f.depth == 10.0
+        assert f.direction == [0, 0, -1]
+        assert f.termination == "blind"
+
+    def test_valid_cut_extrude_all_fields(self):
+        """CutExtrudeFeature with all fields explicitly set."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        f = CutExtrudeFeature(
+            feature_id="F003",
+            sketch_id="SK003",
+            target="F001",
+            direction=[0, 0, 1],
+            depth="$pocket_depth",
+            termination="through_all",
+        )
+        assert f.depth == "$pocket_depth"
+        assert f.termination == "through_all"
+        assert f.direction == [0, 0, 1]
+
+    def test_defaults_apply(self):
+        """Non-required fields get correct defaults."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        f = CutExtrudeFeature(feature_id="F002", sketch_id="SK002", target="F001", depth=5.0)
+        assert f.direction == [0, 0, -1]
+        assert f.termination == "blind"
+
+    def test_rejects_invalid_termination(self):
+        """Termination must be 'blind' or 'through_all'."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        with pytest.raises(ValidationError):
+            CutExtrudeFeature(feature_id="F002", sketch_id="SK002", target="F001", depth=10,
+                              termination="up_to_face")
+
+    def test_rejects_missing_target(self):
+        """target is required."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        with pytest.raises(ValidationError):
+            CutExtrudeFeature(feature_id="F002", sketch_id="SK002", depth=10)
+
+    def test_rejects_nan_direction(self):
+        """Direction with NaN values rejected at schema level."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        with pytest.raises(ValidationError):
+            CutExtrudeFeature(feature_id="F002", sketch_id="SK002", target="F001", depth=10,
+                              direction=[0.0, 0.0, float("nan")])
+
+    def test_rejects_extra_fields(self):
+        """Extra fields forbidden per model_config."""
+        from extrudely.cfp.features import CutExtrudeFeature
+        with pytest.raises(ValidationError):
+            CutExtrudeFeature(feature_id="F002", sketch_id="SK002", target="F001", depth=10,
+                              extra_field=42)
