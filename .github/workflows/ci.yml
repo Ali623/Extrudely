@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --group dev
+      - run: uv run ruff check .
+
+  test:
+    name: Test (pytest)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync
+      - run: uv run pytest -q
+
+  validate-structure:
+    name: Validate directory structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required directories exist
+        run: |
+          set -e
+          for dir in \
+            src/extrudely/input \
+            src/extrudely/raster \
+            src/extrudely/vector \
+            src/extrudely/cdr \
+            src/extrudely/reasoning \
+            src/extrudely/cfp \
+            src/extrudely/compiler \
+            src/extrudely/cad \
+            src/extrudely/validation \
+            src/extrudely/correction \
+            src/extrudely/benchmark \
+            src/extrudely/common \
+            apps/web \
+            tests/unit \
+            tests/integration \
+            tests/benchmark \
+            docker \
+            configs \
+            scripts \
+            docs; do
+            if [ ! -d "$dir" ]; then echo "MISSING: $dir"; exit 1; fi
+          done
+
+          for dir in \
+            src/extrudely/input \
+            src/extrudely/raster \
+            src/extrudely/vector \
+            src/extrudely/cdr \
+            src/extrudely/reasoning \
+            src/extrudely/cfp \
+            src/extrudely/compiler \
+            src/extrudely/cad \
+            src/extrudely/validation \
+            src/extrudely/correction \
+            src/extrudely/benchmark \
+            src/extrudely/common; do
+            if [ ! -f "$dir/__init__.py" ]; then echo "MISSING __init__.py: $dir"; exit 1; fi
+          done
+
+          echo "All directory structure checks passed."

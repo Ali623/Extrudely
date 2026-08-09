@@ -232,5 +232,14 @@ _bmad-output/
 .claude/
 .agents/
 
+# Datasets and experiments (contents ignored; dirs tracked via .gitkeep)
+datasets/raw/*
+!datasets/raw/.gitkeep
+experiments/*
+!experiments/.gitkeep
+
+# Docker sandbox (built locally, not committed)
+docker/sandbox/
+
 # Per-developer Python version
 .python-version
